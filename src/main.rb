@@ -1,15 +1,21 @@
 # main.rb
 
-require_relative 'lexer.rb'
-require_relative 'parser.rb'
-require_relative 'semantic.rb'
-require_relative 'codegen.rb'
+require_relative 'lexer'
+require_relative 'parser'
+require_relative 'semantic'
+require_relative 'codegen'
+
+# Проверка наличия аргумента командной строки
+if ARGV.length != 1
+  puts "Usage: juno <source file>"
+  exit 1
+end
 
 # Путь до целевого файла
-path = "hello_program.ll"
+path = "out.ll"
 
-# Программа на вашем языке
-source_code = File.read("#{ARGV[0]}")
+# Считывание исходного кода из файла
+source_code = File.read(ARGV[0])
 
 # Лексический анализ
 lexer = Lexer.new(source_code)

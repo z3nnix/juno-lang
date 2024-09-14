@@ -1,5 +1,3 @@
-# codegen.rb
-
 class CodeGenerator
   def initialize(ast, path)
     @ast = ast
@@ -8,13 +6,15 @@ class CodeGenerator
 
   def generate
     # Генерация LLVM IR
+    str_value = @ast[:value]
+    str_length = str_value.length + 2 # +1 для \n, +1 для \0
     llvm_ir = <<-LLVM
-@.str = private unnamed_addr constant [15 x i8] c"Hello, world!\\0A\\00", align 1
+@.str = private unnamed_addr constant [#{str_length} x i8] c"#{str_value}\\0A\\00", align 1
 
 declare i32 @printf(i8*, ...) nounwind
 
 define i32 @main() {
-    call i32 @printf(i8* getelementptr inbounds ([15 x i8], [15 x i8]* @.str, i32 0, i32 0))
+    call i32 @printf(i8* getelementptr inbounds ([#{str_length} x i8], [#{str_length} x i8]* @.str, i32 0, i32 0))
     ret i32 0
 }
 LLVM
