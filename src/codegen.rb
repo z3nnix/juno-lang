@@ -6,8 +6,8 @@ class CodeGenerator
 
   def generate
     # Генерация LLVM IR
-    str_value = @ast[:value]
-    str_length = str_value.length + 2 # +1 для \n, +1 для \0
+    str_value = @ast[:value].encode('UTF-8') # Убедитесь, что строка в UTF-8
+    str_length = str_value.bytesize + 2 # +1 для \n, +1 для \0
     llvm_ir = <<-LLVM
 @.str = private unnamed_addr constant [#{str_length} x i8] c"#{str_value}\\0A\\00", align 1
 
