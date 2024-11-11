@@ -1,16 +1,18 @@
-# parser.rb
-
 class Parser
   def initialize(tokens)
     @tokens = tokens
   end
 
   def parse
-    # Простой парсер, который обрабатывает токены
-    if @tokens[0][:type] == :println
-      return { type: :println, value: @tokens[0][:value] }
+    parsed_statements = []
+
+    @tokens.each do |token|
+      case token[:type]
+      when :println
+        parsed_statements << { type: :println, value: token[:value] }
+      end
     end
-    nil
+
+    parsed_statements
   end
 end
-

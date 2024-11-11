@@ -1,17 +1,19 @@
-# lexer.rb
-
 class Lexer
   def initialize(source)
     @source = source
+    @lines = @source.lines
   end
 
   def tokenize
     # Простой токенизатор, который разбивает строку на токены
     tokens = []
-    if @source =~ /println "(.*)"/
-      tokens << { type: :println, value: $1 }
+
+    @lines.each do |line|
+      if line =~ /println "(.*)"/
+        tokens << { type: :println, value: $1 }
+      end
     end
+
     tokens
   end
 end
-
