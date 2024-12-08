@@ -6,8 +6,6 @@ class SemanticAnalyzer
   end
 
   def analyze
-    # Здесь можно добавить семантический анализ
-    # В этом примере просто возвращаем AST
     @ast
   end
 end

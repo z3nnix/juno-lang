@@ -1,9 +1,10 @@
 # main.rb
+require_relative "colors.rb"
 
-require_relative 'lexer'
-require_relative 'parser'
-require_relative 'semantic'
-require_relative 'codegen'
+require_relative "lexer"
+require_relative "parser"
+require_relative "semantic"
+require_relative "codegen"
 
 if ARGV.length != 1
   puts "Usage: juno <source file>"

@@ -2,88 +2,195 @@ class CodeGenerator
   def initialize(ast, path)
     @ast = ast
     @path = path
-    @string_counter = 0 # Счётчик для уникальных строк
+    @string_counter = 0
+    @increment_counter = 0
     @llvm_ir = ""
-    @string_lengths = [] # Массив для хранения длин строк
+    @string_constants = []
+    @variables = {}
   end
 
   def generate
-    # Добавление объявления функции printf один раз
+    generate_header
+    generate_string_constants
+    generate_main_function
+
+    final_ir = @string_constants.join("\n") + "\n" + @llvm_ir
+    File.write(@path, final_ir)
+
+    compile_and_run
+  end
+
+  private
+
+  def generate_header
     @llvm_ir << <<-LLVM
+; Объявления функций
 declare i32 @printf(i8*, ...) nounwind
+declare i32 @sprintf(i8*, i8*, ...) nounwind
+declare i8* @llvm.stacksave()
+declare void @llvm.stackrestore(i8*)
+
+; Константы для форматирования
+@.str.int = private unnamed_addr constant [3 x i8] c"%d\\00", align 1
+@.str.newline = private unnamed_addr constant [2 x i8] c"\\0A\\00", align 1
 
 LLVM
+  end
 
-    # Генерация строковых констант
-    string_definitions = ""
-    
+  def generate_string_constants
     @ast.each do |node|
-      if node[:type] == :println
-        str_value = node[:value].encode('UTF-8') # Убедитесь, что строка в UTF-8
-        str_length = str_value.bytesize + 2 # +1 для \n, +1 для \0
-
-        # Генерация уникального имени для каждой строки
-        unique_str_name = "@str#{@string_counter}"
-        @string_counter += 1
-
-        string_definitions << <<-LLVM
-#{unique_str_name} = private unnamed_addr constant [#{str_length} x i8] c"#{str_value}\\0A\\00", align 1
-LLVM
-
-        # Сохраняем длину строки для использования позже
-        @string_lengths << str_length
+      case node[:type]
+      when :variable_declaration
+        generate_string_constant(node[:value]) if node[:var_type] == :let_string
+      when :assignment
+        generate_string_constant(node[:value]) if node[:var_type] == :assign_string
+      when :print
+        generate_string_constant(node[:value][1..-2]) if node[:value].start_with?('"') && node[:value].end_with?('"')
       end
     end
+  end
 
-    # Добавление определений строк в начало IR
-    @llvm_ir << string_definitions
+  def generate_string_constant(value)
+    str_value = value.gsub('"', '').encode('UTF-8')
+    str_length = str_value.bytesize + 1
+    @string_constants << "@str#{@string_counter} = private unnamed_addr constant [#{str_length} x i8] c\"#{str_value}\\00\", align 1"
+    @string_counter += 1
+  end
 
-    # Определение функции main
-    @llvm_ir << <<-LLVM
-define i32 @main() {
-LLVM
+  def generate_main_function
+    @llvm_ir << "define i32 @main() {\n"
 
-    # Добавление вызовов printf для каждой строки
     @ast.each_with_index do |node, index|
-      if node[:type] == :println
-        unique_str_name = "@str#{index}" # Получаем имя строки по индексу
-        
-        @llvm_ir << <<-LLVM
-    call i32 @printf(i8* getelementptr inbounds ([#{@string_lengths[index]} x i8], [#{@string_lengths[index]} x i8]* #{unique_str_name}, i32 0, i32 0))
-LLVM
+      case node[:type]
+      when :variable_declaration
+        generate_variable_declaration(node)
+      when :assignment
+        generate_assignment(node)
+      when :increment
+        generate_increment(node)
+      when :add
+        generate_add(node)
+      when :print
+        generate_print(node, index)
       end
     end
 
-    # Завершение функции main
-    @llvm_ir << <<-LLVM
-    ret i32 0
-}
-LLVM
+    @llvm_ir << "  ret i32 0\n}\n"
+  end
 
-    # Сохранение LLVM IR в файл
-    File.write(@path, @llvm_ir)
+  def generate_variable_declaration(node)
+    if node[:var_type] == :let_int
+      @variables[node[:name]] = { type: 'i32', mutable: node[:mutable] }
+      @llvm_ir << "  %#{node[:name]} = alloca i32\n"
+      @llvm_ir << "  store i32 #{node[:value]}, i32* %#{node[:name]}\n"
+    elsif node[:var_type] == :let_string
+      @variables[node[:name]] = { type: 'i8*', mutable: node[:mutable] }
+      @llvm_ir << "  %#{node[:name]} = alloca i8*, align 8\n"
+      @llvm_ir << "  store i8* getelementptr inbounds ([#{node[:value].bytesize + 1} x i8], [#{node[:value].bytesize + 1} x i8]* @str#{@string_counter - 1}, i32 0, i32 0), i8** %#{node[:name]}\n"
+    end
+  end
 
-    # Компиляция LLVM IR в исполняемый файл
+  def generate_assignment(node)
+    if @variables[node[:name]]
+      if @variables[node[:name]][:mutable]
+        if node[:var_type] == :assign_int && @variables[node[:name]][:type] == 'i32'
+          @llvm_ir << "  store i32 #{node[:value]}, i32* %#{node[:name]}\n"
+        elsif node[:var_type] == :assign_string && @variables[node[:name]][:type] == 'i8*'
+          str_length = node[:value].bytesize + 1
+          @llvm_ir << "  store i8* getelementptr inbounds ([#{str_length} x i8], [#{str_length} x i8]* @str#{@string_counter - 1}, i32 0, i32 0), i8** %#{node[:name]}\n"
+        else
+          puts "Fatal error".red + ": Type mismatch in assignment for variable #{node[:name]}"
+          exit
+        end
+      else
+        puts "Fatal error".red + ": Cannot assign to non-mutable variable #{node[:name]}"
+        exit
+      end
+    else
+      puts "Fatal error".red + ": Unknown variable in assignment: #{node[:name]}"
+      exit
+    end
+  end
+
+  def generate_increment(node)
+    if @variables[node[:name]] && @variables[node[:name]][:type] == 'i32' && @variables[node[:name]][:mutable]
+      increment_id = "#{node[:name]}_inc_#{@increment_counter}"
+      @increment_counter += 1
+
+      @llvm_ir << "  %#{increment_id}_value = load i32, i32* %#{node[:name]}\n"
+      @llvm_ir << "  %#{increment_id}_result = add i32 %#{increment_id}_value, 1\n"
+      @llvm_ir << "  store i32 %#{increment_id}_result, i32* %#{node[:name]}\n"
+    else
+      puts "Fatal error".red +  ": Cannot increment non-mutable or non-integer variable - #{node[:name]}"
+      puts "\tlet #{node[:name]}" + ":mut ".green + "= ..."
+      exit
+    end
+  end
+
+  def generate_add(node)
+    if @variables[node[:name]] && @variables[node[:name]][:type] == 'i32' && @variables[node[:name]][:mutable]
+      add_id = "#{node[:name]}_add_#{@increment_counter}"
+      @increment_counter += 1
+
+      @llvm_ir << "  %#{add_id}_value = load i32, i32* %#{node[:name]}\n"
+      @llvm_ir << "  %#{add_id}_result = add i32 %#{add_id}_value, #{node[:value]}\n"
+      @llvm_ir << "  store i32 %#{add_id}_result, i32* %#{node[:name]}\n"
+    else
+      puts "Fatal error".red + ": Cannot add to non-mutable or non-integer variable - #{node[:name]}"
+      puts "\tlet #{node[:name]}" + ":mut ".green + "= ..."
+      exit
+    end
+  end
+
+  def generate_print(node, index)
+    if node[:value].start_with?('"') && node[:value].end_with?('"')
+      # Printing string literal
+      str_length = node[:value].bytesize - 1
+      @llvm_ir << "  call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([#{str_length} x i8], [#{str_length} x i8]* @str#{index}, i32 0, i32 0))\n"
+    elsif @variables[node[:value]]
+      # Printing variable
+      if @variables[node[:value]][:type] == 'i32'
+        @llvm_ir << "  %#{node[:value]}_load = load i32, i32* %#{node[:value]}\n"
+        @llvm_ir << "  %#{node[:value]}_str = call i8* @llvm.stacksave()\n"
+        @llvm_ir << "  %#{node[:value]}_ptr = alloca [16 x i8]\n"
+        @llvm_ir << "  %#{node[:value]}_cast = bitcast [16 x i8]* %#{node[:value]}_ptr to i8*\n"
+        @llvm_ir << "  call i32 (i8*, i8*, ...) @sprintf(i8* %#{node[:value]}_cast, i8* getelementptr inbounds ([3 x i8], [3 x i8]* @.str.int, i32 0, i32 0), i32 %#{node[:value]}_load)\n"
+        @llvm_ir << "  call i32 (i8*, ...) @printf(i8* %#{node[:value]}_cast)\n"
+        @llvm_ir << "  call void @llvm.stackrestore(i8* %#{node[:value]}_str)\n"
+      elsif @variables[node[:value]][:type] == 'i8*'
+        @llvm_ir << "  %#{node[:value]}_load = load i8*, i8** %#{node[:value]}\n"
+        @llvm_ir << "  call i32 (i8*, ...) @printf(i8* %#{node[:value]}_load)\n"
+      end
+    else
+      if node[:value] == nil
+        puts "Fatal error".red + ": print() cannot be empty"
+        exit
+      else
+        puts "Fatal error".red + ": Unknown variable in print: #{node[:value]}"
+        exit
+      end
+    end
+    # Add newline after each print
+    @llvm_ir << "  call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([2 x i8], [2 x i8]* @.str.newline, i32 0, i32 0))\n"
+  end
+
+  def compile_and_run
     system("llvm-as #{@path} -o a.bc")
     
-    # Проверка на наличие файла перед компиляцией
     if File.exist?("a.bc")
       system("llc a.bc -o a.s")
       
       if File.exist?("a.s")
         system("gcc a.s -o a.out -no-pie")
-        
-        # Запуск исполняемого файла
         system("./a.out")
 
-        # Удаление временных файлов
         File.delete("a.bc") if File.exist?("a.bc")
         File.delete("a.s") if File.exist?("a.s")
       else
-        puts "Ошибка: файл a.s не был создан."
+        puts "Compiler error".red + ": a.s file was not created."
       end
     else
-      puts "Ошибка: файл a.bc не был создан."
+      puts "Compiler error".red + ": a.bc file was not created."
     end
   end
 end

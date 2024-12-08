@@ -3,7 +3,6 @@
 
 ## Features of Juno
 - Simple syntax
-- **Normal** object-oriented programming (like classes, functions)
 - high speed
 - ARM64 compilation
 
@@ -25,7 +24,7 @@ so, for get started we need to install deps:
 
 ## Syntax example
 ```juno
-println "Hello, Juno!"
+print "Hello, Juno!"
 ```
 Other examples represented on example/ directory
 
