@@ -1,13 +1,27 @@
-# Juno
-> This repository contains Juno compiler, Juno's stdlib, tools and docs.
+<div align="center" style="display:grid;place-items:center;">
+<p>
+    <a href="https://z3nnix/juno-lang" target="_blank"><img width="80" src=https://raw.githubusercontent.com/z3nnix/juno-lang/refs/heads/main/juno-logo.png alt="V logo"></a>
+</p>
+<h1>The Juno Programming Language</h1>
+
+[Docs](https://github.com/z3nnix/juno-lang/docs.md)
+| [Changelog](https://github.com/z3nnix/juno-lang/CHANGELOG.md)
+| [Speed](https://github.com/z3nnix/juno-lang/BENCHMARK.md)
+| [Contributing](https://github.com/z3nnix/juno-lang/CONTRIBUTING.md)
+<br> <br>
+This repository contains Juno compiler, Juno's stdlib, tools and docs.
+</div>
+<div align="center" style="display:grid;place-items:center;">
+
+</div>
 
 ## Features of Juno
 - Simple syntax
 - high speed
-- ARM64 compilation
+- Cross-compile
 
 ## How to build Juno?
-so, for get started we need to install deps:
+so, for get started we need to install deps: <br><br>
 **For archlinux // arch-based:**
 ```shell
 [root@pc: ~] # pacman -S ruby
@@ -26,15 +40,4 @@ so, for get started we need to install deps:
 ```juno
 print "Hello, Juno!"
 ```
-Other examples represented on example/ directory
-
-# LICENSE
-```
-Copyright 2024 Zennix
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-```
+Other examples represented on example/ directory.
