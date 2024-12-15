@@ -24,6 +24,7 @@ ast = parser.parse
 analyzer = SemanticAnalyzer.new(ast)
 analyzed_ast = analyzer.analyze
 
+puts(analyzed_ast)
 codegen = CodeGenerator.new(analyzed_ast, path)
 codegen.generate
 
