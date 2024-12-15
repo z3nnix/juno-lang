@@ -1,1 +1,3 @@
-print("Hello, Juno!")
+let someText = "Hello, Juno!"
+
+print(someText)

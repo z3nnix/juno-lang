@@ -99,15 +99,15 @@ LLVM
           str_length = node[:value].bytesize - 1
           @llvm_ir << "  store i8* getelementptr inbounds ([#{str_length} x i8], [#{str_length} x i8]* @str#{index}, i32 0, i32 0), i8** %#{node[:name]}\n"
         else
-          puts "Fatal error: Type mismatch in assignment for variable #{node[:name]}"
+          puts "Fatal error: ".red + "Type mismatch in assignment for variable #{node[:name]}"
           exit(1)
         end
       else
-        puts "Fatal error: Cannot assign to non-mutable variable #{node[:name]}"
+        puts "Fatal error: ".red + "Cannot assign to non-mutable variable #{node[:name]}"
         exit(1)
       end
     else
-      puts "Fatal error: Unknown variable in assignment: #{node[:name]}"
+      puts "Fatal error: ".red + "Unknown variable in assignment: #{node[:name]}"
       exit(1)
     end
   end
@@ -121,8 +121,8 @@ LLVM
       @llvm_ir << "  %#{increment_id}_result = add i32 %#{increment_id}_value, 1\n"
       @llvm_ir << "  store i32 %#{increment_id}_result, i32* %#{node[:name]}\n"
     else
-      puts "Fatal error: Cannot increment non-mutable or non-integer variable - #{node[:name]}"
-      puts "\tlet #{node[:name]}:mut = ..."
+      puts "Fatal error: ".red + "Cannot increment non-mutable or non-integer variable - #{node[:name]}"
+      puts "\tlet #{node[:name]}:" + "mut".green + "= ..."
       exit(1)
     end
   end
@@ -136,7 +136,7 @@ LLVM
       @llvm_ir << "  %#{add_id}_result = add i32 %#{add_id}_value, #{node[:value]}\n"
       @llvm_ir << "  store i32 %#{add_id}_result, i32* %#{node[:name]}\n"
     else
-      puts "Fatal error: Cannot add to non-mutable or non-integer variable - #{node[:name]}"
+      puts "Fatal error:".red + "Cannot add to non-mutable or non-integer variable - #{node[:name]}"
       puts "\tlet #{node[:name]}:mut = ..."
       exit(1)
     end
@@ -163,10 +163,10 @@ LLVM
       end
     else
       if node[:value].nil?
-        puts "Fatal error: print() cannot be empty"
+        puts "Fatal error: ".red + "print() cannot be empty"
         exit(1)
       else
-        puts "Fatal error: Unknown variable in print: #{node[:value]}"
+        puts "Fatal error: ".red + "Unknown variable in print: #{node[:value]}"
         exit(1)
       end
     end
@@ -187,10 +187,10 @@ LLVM
         File.delete("a.bc") if File.exist?("a.bc")
         File.delete("a.s") if File.exist?("a.s")
       else
-        puts "Compiler error: a.s file was not created."
+        puts "Compiler error: ".red + "a.s file was not created."
       end
     else
-      puts "Compiler error: a.bc file was not created."
+      puts "Compiler error: ".red + "a.bc file was not created."
     end
   end
 end
