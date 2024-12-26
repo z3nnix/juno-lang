@@ -1,12 +1,9 @@
 class Parser
-
   def initialize(tokens)
     @tokens = tokens
     @current_token_index = 0
   end
 
-  #Парсятся ли бинарные выражения?
-  #Нет, не парсятся, считайте в уме
   def parse
     parsed_statements = []
 
@@ -31,6 +28,8 @@ class Parser
       parse_addition
     when :print
       parse_print
+    when :input # New case for input handling
+      parse_input
     else
       raise "Unexpected token: #{current_token}"
     end
@@ -81,6 +80,14 @@ class Parser
       value: token[:value]
     }
   end
+  
+  def parse_input # New method for parsing input statements.
+    token = consume(:input)
+    {
+      type: :input,
+      name: token[:name]
+    }
+  end
 
   def consume(*expected_types)
     raise "Unexpected end of input" if @current_token_index >= @tokens.length
@@ -96,5 +103,5 @@ class Parser
 
   def current_token
     @tokens[@current_token_index]
-  end
-end
+  end  
+end 

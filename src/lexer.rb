@@ -26,6 +26,8 @@ class Lexer
         tokens << { type: :add, name: $1, value: $2.to_i }
       when /^print\s*\((.*)\)$/
         tokens << { type: :print, value: $1 }
+      when /^input\s*\((\w+)\)$/
+        tokens << { type: :input, name: $1 } # New input token
       end
     end
 
