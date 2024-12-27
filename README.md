@@ -37,7 +37,7 @@ To set up Juno, ensure you have the following dependencies installed:
     ```
 
 - **Tiny C Compiler (tcc) v0.9.27**
-  - Download from the [official repository](https://github.com/Tiny-C-Compiler/tinycc).
+  - Download from the [official repository](https://github.com/Tiny-C-Compiler).
   - Build and install:
     ```bash
     ./configure
