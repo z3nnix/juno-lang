@@ -1,11 +1,11 @@
-require_relative 'header_generator'
-require_relative 'string_constant_generator'
-require_relative 'main_function_generator'
-require_relative 'variable_declaration_generator'
-require_relative 'assignment_generator'
-require_relative 'increment_generator'
-require_relative 'print_generator'
-require_relative 'compiler'
+require_relative "header_generator"
+require_relative "string_constant_generator"
+require_relative "main_function_generator"
+require_relative "variable_declaration_generator"
+require_relative "assignment_generator"
+require_relative "increment_generator"
+require_relative "print_generator"
+require_relative "compiler"
 
 class CodeGenerator
   def initialize(ast, path)
@@ -45,4 +45,4 @@ class CodeGenerator
   def compile_and_run 
     Compiler.compile_and_run(@path, @c_code)
   end
-end 
+end

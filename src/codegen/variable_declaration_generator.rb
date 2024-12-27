@@ -13,4 +13,4 @@ module VariableDeclarationGenerator
         end
       end
     end 
-  end   
+end   

@@ -12,4 +12,4 @@ module IncrementGenerator
         exit(1)
       end 
     end 
- end  
+end  

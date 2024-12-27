@@ -10,5 +10,4 @@ module Compiler
         puts "Compiler error".red + ":a.out file was not created."
       end 
     end 
- end 
- 
+end

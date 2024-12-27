@@ -6,4 +6,4 @@ module HeaderGenerator
   
   C
     end
-  end  
+end  

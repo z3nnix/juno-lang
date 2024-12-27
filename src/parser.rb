@@ -28,7 +28,7 @@ class Parser
       parse_addition
     when :print
       parse_print
-    when :input # New case for input handling
+    when :input
       parse_input
     else
       raise "Unexpected token: #{current_token}"

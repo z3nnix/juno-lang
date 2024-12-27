@@ -21,4 +21,4 @@ module StringConstantGenerator
       str_value = value.gsub('"', '').encode('UTF-8')
       string_constants << "const char* str#{index} = \"#{str_value}\";"
     end
-  end  
+end  

@@ -7,6 +7,8 @@ class Lexer
   def tokenize
     tokens = []
 
+    handle_includes(tokens)
+
     @lines.each do |line|
       line_without_comment = line.split('//').first.strip
       next if line_without_comment.empty?
@@ -27,10 +29,36 @@ class Lexer
       when /^print\s*\((.*)\)$/
         tokens << { type: :print, value: $1 }
       when /^input\s*\((\w+)\)$/
-        tokens << { type: :input, name: $1 } # New input token
+        tokens << { type: :input, name: $1 }
       end
     end
 
     tokens
+  end
+
+  private
+
+  def handle_includes(tokens)
+    new_source = ""
+
+    @lines.each do |line|
+      if line =~ /^include\s+"(.+)"$/
+        file_name = $1.strip
+        begin
+          included_content = File.read(file_name)
+
+          included_lexer = Lexer.new(included_content)
+          included_tokens = included_lexer.tokenize
+          tokens.concat(included_tokens)
+        rescue Errno::ENOENT
+          raise "File not found: #{file_name}"
+        end
+      else
+        new_source << line
+      end
+    end
+
+    @source = new_source
+    @lines = @source.lines
   end
 end

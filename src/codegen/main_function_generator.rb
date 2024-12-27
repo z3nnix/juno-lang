@@ -17,4 +17,4 @@ module MainFunctionGenerator
   
       c_code << "  return 0;\n}\n"
     end
-  end   
+end   

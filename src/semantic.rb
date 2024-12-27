@@ -9,4 +9,3 @@ class SemanticAnalyzer
     @ast
   end
 end
-
