@@ -30,6 +30,8 @@ class Parser
       parse_print
     when :input
       parse_input
+    when :insertC
+      parse_insert_c
     else
       raise "Unexpected token: #{current_token}"
     end
@@ -81,11 +83,20 @@ class Parser
     }
   end
   
-  def parse_input # New method for parsing input statements.
+  def parse_input
     token = consume(:input)
     {
       type: :input,
       name: token[:name]
+    }
+  end
+
+  def parse_insert_c
+    token = consume(:insertC)
+
+    {
+      type: :insertC,
+      content: token[:content] # Directly use the captured content from the lexer.
     }
   end
 

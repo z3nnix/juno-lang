@@ -10,6 +10,8 @@ module MainFunctionGenerator
           AssignmentGenerator.generate(node, index, c_code, variables)
         when :increment
           IncrementGenerator.generate(node, variables, c_code) 
+        when :insertC
+          InsertcGenerator.generate(node, c_code)
         when :print
           PrintGenerator.generate(node, index, c_code, variables)
         end

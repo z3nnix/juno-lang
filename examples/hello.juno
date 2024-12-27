@@ -1,1 +1,3 @@
-print("Hello, Juno!")
+insertC {
+    printf("бугагашеньки");
+}

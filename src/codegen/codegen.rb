@@ -5,6 +5,7 @@ require_relative "variable_declaration_generator"
 require_relative "assignment_generator"
 require_relative "increment_generator"
 require_relative "print_generator"
+require_relative "insertc_generator"
 require_relative "compiler"
 
 class CodeGenerator
