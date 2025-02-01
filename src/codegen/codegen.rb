@@ -19,31 +19,31 @@ class CodeGenerator
   end
 
   def generate
-    generate_header
-    generate_string_constants
-    generate_main_function
+    genHeader
+    genStringConst
+    genMainFn
 
     File.write(@path, @c_code)
 
-    compile_and_run
+    compileRun
     return @c_code
   end
 
   private
 
-  def generate_header
+  def genHeader
     HeaderGenerator.generate(@c_code)
   end
 
-  def generate_string_constants
+  def genStringConst
     StringConstantGenerator.generate(@ast, @c_code, @string_constants, @string_counter, @variables)
   end
 
-  def generate_main_function
+  def genMainFn
     MainFunctionGenerator.generate(@ast, @c_code, @variables)
   end
 
-  def compile_and_run 
-    Compiler.compile_and_run(@path, @c_code)
+  def compileRun
+    Compiler.compileRun(@path, @c_code)
   end
 end

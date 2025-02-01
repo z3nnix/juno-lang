@@ -26,10 +26,10 @@ class Lexer
       elsif line.start_with?("insertC {")
         inside_insert_c = true
       elsif line == "}"
-        # Игнорируем отдельные закрывающие фигурные скобки вне insertC.
+
         next 
       elsif line.empty?
-        next # Пропускаем пустые строки.
+        next
       elsif line =~ /^let\s+(\w+)(?::mut)?\s*=\s*"(.+)"$/
         tokens << { type: :let_string, name: $1, value: $2, mutable: !!$&.include?(':mut') }
       elsif line =~ /^let\s+(\w+)(?::mut)?\s*=\s*(\d+)$/
@@ -62,10 +62,10 @@ class Lexer
         file_name = $1.strip
         begin
           included_content = File.read(file_name)
-          # Создаем новый лексер для включаемого содержимого и токенизируем его
+
           included_lexer = Lexer.new(included_content)
           included_tokens = included_lexer.tokenize
-          tokens.concat(included_tokens) # Добавляем токены из включаемого файла
+          tokens.concat(included_tokens)
         rescue Errno::ENOENT
           raise "File not found: #{file_name}"
         end
@@ -74,7 +74,7 @@ class Lexer
       end
     end
 
-    @source = new_source.strip # Удаляем лишние пробелы в конце.
-    @lines = @source.lines # Обновляем строки после обработки includes.
+    @source = new_source.strip
+    @lines = @source.lines
   end
 end
