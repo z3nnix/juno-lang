@@ -4,8 +4,7 @@ module IncrementGenerator
         variables[node[:name]][:type] == 'int' && 
         variables[node[:name]][:mutable]
         
-        # Прямой инкремент переменной.
-        c_code << "#{node[:name]}++;\n" 
+        c_code << "  #{node[:name]}++;\n" 
         
       else 
         puts "Fatal error".red + ": Cannot increment non-mutable or non-integer variable - #{node[:name]}"
